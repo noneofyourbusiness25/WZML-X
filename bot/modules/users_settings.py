@@ -1011,7 +1011,26 @@ async def set_option(_, message, option, rfunc):
         if not value.isdigit():
             value = get_size_bytes(value)
         value = min(int(value), TgClient.MAX_SPLIT_SIZE)
-    # elif option == "LEECH_DUMP_CHAT": # TODO: Add
+    elif option == "LEECH_DUMP_CHAT":
+        if value.lower() == "none" or value.lower() == "false":
+            value = ""
+        else:
+            val_split = value.split(':', 1)
+            if len(val_split) == 2 and val_split[0] in ['b', 'u']:
+                prefix = val_split[0]
+                chat_id = val_split[1]
+                if chat_id.lower() == "pm":
+                    chat_id = "pm"
+                elif chat_id.startswith('@'):
+                    chat_id = chat_id
+                elif chat_id.lstrip('-').isdigit():
+                    chat_id = int(chat_id)
+                value = f"{prefix}:{chat_id}"
+            else:
+                await send_message(
+                    message, "Invalid format! Use b:id, u:id, b:@username, u:@username, b:pm"
+                )
+                return
     elif option == "EXCLUDED_EXTENSIONS":
         fx = value.split()
         value = ["aria2", "!qB"]
